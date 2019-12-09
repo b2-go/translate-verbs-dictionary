@@ -23,14 +23,12 @@ func main() {
 	}
 	defer db.Close()
 
-	sqlStmt := "CREATE TABLE " + lang + " (id INTEGER not null primary key, verb_inf TEXT, verb TEXT, itr NUMERIC, tr NUMERIC, langues TEXT, flex TEXT, flexOpts TEXT)"
-	_, _ = db.Exec(sqlStmt)
-
-	sqlStmt = "DELETE FROM " + lang
-	_, err = db.Exec(sqlStmt)
-	if err != nil {
-		log.Fatalf("%q: %s", err, sqlStmt)
-	}
+	sqlStmt := `
+CREATE TABLE %s (id INTEGER PRIMARY KEY AUTOINCREMENT, verb_inf TEXT, verb TEXT, itr NUMERIC, tr NUMERIC, langues TEXT, flex TEXT, flexOpts TEXT, pers INTEGER, plur INTEGER, form TEXT);
+CREATE INDEX idx_verb ON %s (verb);
+CREATE INDEX idx_form ON %s (pers, plur, form);
+	`
+	_, _ = db.Exec(fmt.Sprintf(sqlStmt, lang, lang, lang))
 
 	f, err := os.Open(file)
 	if err != nil {
@@ -46,13 +44,13 @@ func main() {
 		log.Fatal(err)
 	}
 
-	stmt, err := tx.Prepare("INSERT INTO " + lang + " (id, verb_inf, verb, itr, tr, langues, flex, flexOpts) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+	stmt, err := tx.Prepare("INSERT INTO " + lang + " (verb_inf, verb, itr, tr, langues, flex, flexOpts, pers, plur, form) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer stmt.Close()
 
-	for i := 0; ; i++ {
+	for {
 		l, err := csvr.Read()
 		if err == io.EOF {
 			break
@@ -66,6 +64,9 @@ func main() {
 		flex := ""
 		flexOpts := []string{}
 		options := strings.Split(l[2], "+")
+		pers := 0
+		plur := 0 // indefini, 1: singulier, 2: pluriel
+		form := ""
 		for i := range options {
 			opt := options[i]
 			switch opt {
@@ -79,45 +80,88 @@ func main() {
 						langues += ","
 					}
 					langues += opt
-				} else if strings.HasPrefix(opt, "FLEX=") {
-					flex = opt[5:]
+				} else if strings.HasPrefix(opt, "FLX=") {
+					flex = opt[4:]
 					flexOpts = options[i+1:]
+					for _, flexOpt := range flexOpts {
+						switch flexOpt {
+						case "1":
+							pers = 1
+						case "2":
+							pers = 2
+						case "3":
+							pers = 3
+						case "p":
+							plur = 2
+						case "s":
+							plur = 1
+							// francais
+						case "PR":
+							form = flexOpt
+						case "F":
+							form = flexOpt
+						case "G":
+							form = flexOpt
+						case "C":
+							form = flexOpt
+						case "S":
+							form = flexOpt
+						case "IP":
+							form = flexOpt
+						case "I":
+							form = flexOpt
+						case "PP":
+							form = flexOpt
+						case "INF":
+							form = flexOpt
+							// quechua
+						case "FA":
+							form = flexOpt
+						case "FP":
+							form = flexOpt
+						case "GER":
+							form = flexOpt
+						case "GER2":
+							form = flexOpt
+						case "OBL":
+							form = flexOpt
+						case "PRES":
+							form = flexOpt
+						case "PASS":
+							form = flexOpt
+						case "PASS1":
+							form = flexOpt
+						case "PASS2":
+							form = flexOpt
+						case "PPA":
+							form = flexOpt
+						case "PPA2":
+							form = flexOpt
+						case "PAPT":
+							form = flexOpt
+						case "PPAT":
+							form = flexOpt
+						case "PPI":
+							form = flexOpt
+						case "RQUF":
+							form = flexOpt
+						case "RS1":
+							form = flexOpt
+						case "SUBI":
+							form = flexOpt
+						case "TI":
+							form = flexOpt
+						}
+					}
 				}
 			}
 		}
-		_, err = stmt.Exec(i, l[1], l[0], itr, tr, langues, flex, strings.Join(flexOpts, "+"))
+		_, err = stmt.Exec(l[1], l[0], itr, tr, langues, flex, strings.Join(flexOpts, "+"), pers, plur, form)
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
 	err = tx.Commit()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	rows, err := db.Query("SELECT id, verb_inf, verb, itr, tr, langues, flex, flexOpts FROM " + lang)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var id int
-		var verbInf string
-		var verb string
-		var itr bool
-		var tr bool
-		var langues string
-		var flex string
-		var flexOpts string
-		err = rows.Scan(&id, &verbInf, &verb, &itr, &tr, &langues, &flex, &flexOpts)
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println(id, verbInf, verb, itr, tr, langues, flex, flexOpts)
-	}
-
-	err = rows.Err()
 	if err != nil {
 		log.Fatal(err)
 	}
