@@ -20,6 +20,7 @@ func main() {
 			log.Fatal(err)
 		}
 		log.Printf("=== %s ===", lang)
+		log.Print("HEAD: id, verb_inf, verb, itr, tr, langues, flex, flexOpts, pers, plur, form")
 		for i := range list {
 			log.Print(list[i])
 		}

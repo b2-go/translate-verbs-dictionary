@@ -43,6 +43,15 @@ func main() {
 			log.Fatal("not translatable in ", translateLang)
 		}
 		verbInf := langues[idx+3:]
+		verbInf = strings.Trim(verbInf, `"`)
+		translation = conjugueVerb(db, translateLang, verbInf, pers, plur, form)
+	case "francais":
+		idx := strings.Index(langues, "FR=")
+		if idx < 0 {
+			log.Fatal("not translatable in ", translateLang)
+		}
+		verbInf := langues[idx+3:]
+		verbInf = strings.Trim(verbInf, `"`)
 		translation = conjugueVerb(db, translateLang, verbInf, pers, plur, form)
 	}
 
@@ -55,16 +64,16 @@ func conjugueVerb(db *sql.DB, lang string, verbInf string, pers, plur int, form 
 	case "quechua":
 		switch form {
 		case "PR":
-			form = "P"
+			form = "PRES"
 		}
 	case "francais":
 		switch form {
-		case "P":
+		case "PRES":
 			form = "PR"
 		}
 	}
 
-	log.Print("CONJUGUE ", verbInf, " ", pers, plur, " ", form)
+	log.Print("CONJUGUE ", lang, " ", verbInf, " ", pers, plur, " ", form)
 	stmt, err := db.Prepare("SELECT verb FROM " + lang + " WHERE verb_inf = ? AND pers = ? AND plur = ? AND form = ?")
 	if err != nil {
 		log.Fatal(err)
