@@ -1,0 +1,1 @@
+go run cmd/list/main.go francais quechua
