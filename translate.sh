@@ -1,8 +1,9 @@
-go run cmd/translate/main.go francais marcheras quechua
-go run cmd/translate/main.go francais marches quechua
-go run cmd/translate/main.go francais chanteras quechua
-go run cmd/translate/main.go francais chantes quechua
-go run cmd/translate/main.go francais parleras quechua
-go run cmd/translate/main.go francais parles quechua
-go run cmd/translate/main.go quechua takinki francais
-go run cmd/translate/main.go quechua takirunki francais
+go build -o translate cmd/translate/main.go
+./translate francais marcheras quechua
+./translate francais marches quechua
+./translate francais chanteras quechua
+./translate francais chantent quechua
+./translate francais parleras quechua
+./translate francais parles quechua
+./translate quechua takinki francais
+./translate quechua takinku francais

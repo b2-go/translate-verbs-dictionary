@@ -64,11 +64,11 @@ func conjugueVerb(db *sql.DB, lang string, verbInf string, pers, plur int, form 
 	case "quechua":
 		switch form {
 		case "PR":
-			form = "PRES"
+			form = "TI"
 		}
 	case "francais":
 		switch form {
-		case "PRES":
+		case "TI":
 			form = "PR"
 		}
 	}
