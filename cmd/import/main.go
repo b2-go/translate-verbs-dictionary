@@ -91,10 +91,14 @@ CREATE INDEX idx_form ON %s (pers, plur, form);
 							pers = 2
 						case "3":
 							pers = 3
-						case "p":
-							plur = 2
 						case "s":
 							plur = 1
+						case "p":
+							plur = 2
+						case "pin":
+							plur = 3
+						case "pex":
+							plur = 4
 							// francais
 						case "PR":
 							form = flexOpt
