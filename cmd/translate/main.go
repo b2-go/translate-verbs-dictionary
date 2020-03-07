@@ -20,5 +20,9 @@ func main() {
 	}
 
 	tx := translator.NewService(db)
-	tx.Translate(lang, verb, translateLang)
+	translation, err := tx.Translate(lang, verb, translateLang)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Printf("%#v", translation)
 }
