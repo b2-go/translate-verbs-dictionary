@@ -5,5 +5,5 @@ import (
 )
 
 func NewDB() (*sql.DB, error) {
-	return sql.Open("sqlite3", "./verbs.db")
+	return sql.Open("sqlite3", "./.data/verbs.db")
 }
