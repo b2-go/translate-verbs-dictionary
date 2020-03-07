@@ -1,3 +1,11 @@
 {
-    "go.inferGopath": false
+    "go.inferGopath": false,
+    "sqltools.connections": [
+        {
+            "database": "\\\\wsl$\\Ubuntu\\home\\baptiste\\go\\src\\github.com\\reagere\\translate-verbs-dictionary\\.data\\verbs.db",
+            "dialect": "SQLite",
+            "name": "verbs"
+        }
+    ],
+    "sqltools.useNodeRuntime": true
 }

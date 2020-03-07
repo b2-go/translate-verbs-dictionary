@@ -1,13 +1,14 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/csv"
 	"fmt"
 	"io"
 	"log"
 	"os"
 	"strings"
+
+	translator "github.com/reagere/translate-verbs-dictionary"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -17,7 +18,7 @@ func main() {
 	lang := os.Args[1]
 	file := os.Args[2]
 
-	db, err := sql.Open("sqlite3", "./verbs.db")
+	db, err := translator.NewDB()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -28,7 +29,10 @@ CREATE TABLE %s (id INTEGER PRIMARY KEY AUTOINCREMENT, verb_inf TEXT, verb TEXT,
 CREATE INDEX idx_verb ON %s (verb);
 CREATE INDEX idx_form ON %s (pers, plur, form);
 	`
-	_, _ = db.Exec(fmt.Sprintf(sqlStmt, lang, lang, lang))
+	_, err = db.Exec(fmt.Sprintf(sqlStmt, lang, lang, lang))
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	f, err := os.Open(file)
 	if err != nil {
