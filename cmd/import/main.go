@@ -84,7 +84,7 @@ CREATE INDEX idx_form_%s ON %s (pers, plur, form);
 						langues += ","
 					}
 					opt = strings.Replace(opt, `"`, "", -1)
-					opt = strings.Replace(opt, ` `, "", -1)
+					opt = strings.Trim(opt, ` `)
 					langues += opt
 				} else if strings.HasPrefix(opt, "FLX=") {
 					flex = opt[4:]
