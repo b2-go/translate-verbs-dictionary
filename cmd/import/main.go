@@ -26,10 +26,10 @@ func main() {
 
 	sqlStmt := `
 CREATE TABLE %s (id INTEGER PRIMARY KEY AUTOINCREMENT, verb_inf TEXT, verb TEXT, itr NUMERIC, tr NUMERIC, langues TEXT, flex TEXT, flexOpts TEXT, pers INTEGER, plur INTEGER, form TEXT);
-CREATE INDEX idx_verb ON %s (verb);
-CREATE INDEX idx_form ON %s (pers, plur, form);
+CREATE INDEX idx_verb_%s ON %s (verb);
+CREATE INDEX idx_form_%s ON %s (pers, plur, form);
 	`
-	_, err = db.Exec(fmt.Sprintf(sqlStmt, lang, lang, lang))
+	_, err = db.Exec(fmt.Sprintf(sqlStmt, lang, lang, lang, lang, lang))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -83,6 +83,8 @@ CREATE INDEX idx_form ON %s (pers, plur, form);
 					if langues != "" {
 						langues += ","
 					}
+					opt = strings.Replace(opt, `"`, "", -1)
+					opt = strings.Replace(opt, ` `, "", -1)
 					langues += opt
 				} else if strings.HasPrefix(opt, "FLX=") {
 					flex = opt[4:]

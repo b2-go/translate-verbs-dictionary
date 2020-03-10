@@ -2,12 +2,13 @@ package translator
 
 import (
 	"database/sql"
+	"fmt"
 )
 
 func List(db *sql.DB, lang string) ([][]interface{}, error) {
 	rows, err := db.Query("SELECT id, verb_inf, verb, itr, tr, langues, flex, flexOpts, pers, plur, form FROM " + lang)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("list query: %w", err)
 	}
 	defer rows.Close()
 
@@ -27,14 +28,14 @@ func List(db *sql.DB, lang string) ([][]interface{}, error) {
 		var form string
 		err = rows.Scan(&id, &verbInf, &verb, &itr, &tr, &langues, &flex, &flexOpts, &pers, &plur, &form)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("list scan: %w", err)
 		}
 		result = append(result, []interface{}{id, verbInf, verb, itr, tr, langues, flex, flexOpts, pers, plur, form})
 	}
 
 	err = rows.Err()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("list errors: %w", err)
 	}
 
 	return result, nil

@@ -38,7 +38,7 @@ func (s *Service) Translate(lang, verb, translateLang string) (*Translation, err
 
 	stmt, err := s.db.Prepare("SELECT langues, pers, plur, form FROM " + lang + " WHERE verb = ?")
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("prepare stmt: %w", err)
 	}
 	defer stmt.Close()
 
@@ -48,7 +48,7 @@ func (s *Service) Translate(lang, verb, translateLang string) (*Translation, err
 	var form string
 	err = stmt.QueryRow(verb).Scan(&langues, &pers, &plur, &form)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("query: %w", err)
 	}
 
 	prefixLang := ""
@@ -72,7 +72,7 @@ func (s *Service) Translate(lang, verb, translateLang string) (*Translation, err
 
 	translation, err := s.conj.ConjugueVerb(translateLang, verbInf, persTx, plur, formTx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("conjugue: %w", err)
 	}
 
 	return &Translation{
