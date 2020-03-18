@@ -1,7 +1,7 @@
 package main
 
 import (
-	"encoding/csv"
+	"bufio"
 	"fmt"
 	"io"
 	"log"
@@ -25,7 +25,7 @@ func main() {
 	defer db.Close()
 
 	sqlStmt := `
-CREATE TABLE %s (id INTEGER PRIMARY KEY AUTOINCREMENT, verb_inf TEXT, verb TEXT, itr NUMERIC, tr NUMERIC, langues TEXT, flex TEXT, flexOpts TEXT, pers INTEGER, plur INTEGER, form TEXT);
+CREATE TABLE %s (id INTEGER PRIMARY KEY AUTOINCREMENT, verb_inf TEXT, verb TEXT, itr NUMERIC, tr NUMERIC, langues TEXT, flex TEXT, flexOpts TEXT, pers INTEGER, plur INTEGER, form TEXT, source TEXT);
 CREATE INDEX idx_verb_%s ON %s (verb);
 CREATE INDEX idx_form_%s ON %s (pers, plur, form);
 	`
@@ -39,35 +39,34 @@ CREATE INDEX idx_form_%s ON %s (pers, plur, form);
 		log.Fatal(err)
 	}
 
-	csvr := csv.NewReader(f)
-	csvr.Comma = ','
-	csvr.LazyQuotes = true
+	r := bufio.NewReader(f)
 
 	tx, err := db.Begin()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	stmt, err := tx.Prepare("INSERT INTO " + lang + " (verb_inf, verb, itr, tr, langues, flex, flexOpts, pers, plur, form) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+	stmt, err := tx.Prepare("INSERT INTO " + lang + " (verb_inf, verb, itr, tr, langues, flex, flexOpts, pers, plur, form, source) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer stmt.Close()
 
 	for {
-		l, err := csvr.Read()
+		l, err := r.ReadString('\n')
 		if err == io.EOF {
 			break
 		}
 		if err != nil {
 			log.Fatal(err)
 		}
+		cols := strings.Split(l, ",")
 		itr := false
 		tr := false
 		langues := ""
 		flex := ""
 		flexOpts := []string{}
-		options := strings.Split(l[2], "+")
+		options := strings.Split(strings.Join(cols[2:], ","), "+")
 		pers := 0
 		plur := 0 // indefini, 1: singulier, 2: pluriel
 		form := ""
@@ -166,7 +165,7 @@ CREATE INDEX idx_form_%s ON %s (pers, plur, form);
 				}
 			}
 		}
-		_, err = stmt.Exec(l[1], l[0], itr, tr, langues, flex, strings.Join(flexOpts, "+"), pers, plur, form)
+		_, err = stmt.Exec(cols[1], cols[0], itr, tr, langues, flex, strings.Join(flexOpts, "+"), pers, plur, form, strings.Join(cols, ","))
 		if err != nil {
 			log.Fatal(err)
 		}

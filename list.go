@@ -6,7 +6,7 @@ import (
 )
 
 func List(db *sql.DB, lang string) ([][]interface{}, error) {
-	rows, err := db.Query("SELECT id, verb_inf, verb, itr, tr, langues, flex, flexOpts, pers, plur, form FROM " + lang)
+	rows, err := db.Query("SELECT id, verb_inf, verb, itr, tr, langues, flex, flexOpts, pers, plur, form, source FROM " + lang)
 	if err != nil {
 		return nil, fmt.Errorf("list query: %w", err)
 	}
@@ -26,11 +26,12 @@ func List(db *sql.DB, lang string) ([][]interface{}, error) {
 		var pers int
 		var plur int
 		var form string
-		err = rows.Scan(&id, &verbInf, &verb, &itr, &tr, &langues, &flex, &flexOpts, &pers, &plur, &form)
+		var source string
+		err = rows.Scan(&id, &verbInf, &verb, &itr, &tr, &langues, &flex, &flexOpts, &pers, &plur, &form, &source)
 		if err != nil {
 			return nil, fmt.Errorf("list scan: %w", err)
 		}
-		result = append(result, []interface{}{id, verbInf, verb, itr, tr, langues, flex, flexOpts, pers, plur, form})
+		result = append(result, []interface{}{id, verbInf, verb, itr, tr, langues, flex, flexOpts, pers, plur, form, source})
 	}
 
 	err = rows.Err()

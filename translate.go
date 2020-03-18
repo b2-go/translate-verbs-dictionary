@@ -19,15 +19,17 @@ func NewService(db *sql.DB) *Service {
 }
 
 type Translation struct {
-	LangueOrigine        string
-	VerbeConjugueOrigine string
+	LangueOrigine         string
+	VerbeConjugueOrigine  string
+	VerbeInfinitifOrigine string
 	// donnée
 	PersonneOrigine int
 	PlurielOrigine  int
 	FormeOrigine    string
 	// results
-	LangueDestination    string
-	VerbeConjugueTraduit string
+	LangueDestination     string
+	VerbeConjugueTraduit  string
+	VerbeInfinitifTraduit string
 	// details
 	PersonneTraduit int
 	PlurielTraduit  int
@@ -46,7 +48,7 @@ func (s *Service) Translate(lang, verb, translateLang string) (*Translation, err
 	var pers int
 	var plur int
 	var form string
-	err = stmt.QueryRow(verb).Scan(&langues, &pers, &plur, &form)
+	err = stmt.QueryRow(verb).Scan(&langues, &pers, &plur, &form) // liste
 	if err != nil {
 		return nil, fmt.Errorf("query: %w", err)
 	}
